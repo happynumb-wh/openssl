@@ -957,7 +957,7 @@ struct ssl_ctx_st
 #endif
 
 #ifndef OPENSSL_NO_BUF_FREELISTS
-#define SSL_MAX_BUF_FREELIST_LEN_DEFAULT 32
+#define SSL_MAX_BUF_FREELIST_LEN_DEFAULT 1
 	unsigned int freelist_max_len;
 	struct ssl3_buf_freelist_st *wbuf_freelist;
 	struct ssl3_buf_freelist_st *rbuf_freelist;

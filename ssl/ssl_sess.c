@@ -461,6 +461,9 @@ int ssl_get_new_session(SSL *s, int session)
  *     if the server should issue a new session ticket (to 0 otherwise).
  */
 #include "uwrapper.h"
+#include "udasics.h"
+#include "uattr.h"
+
 int ssl_get_prev_session(SSL *s, unsigned char *session_id, int len,
 			const unsigned char *limit)
 	{
@@ -525,9 +528,13 @@ int ssl_get_prev_session(SSL *s, unsigned char *session_id, int len,
 	    s->session_ctx->get_session_cb != NULL)
 		{
 		int copy=1;
-	
+		
+		if (!umaincall_helper)
+			ret = s->session_ctx->get_session_cb(s,session_id,len,&copy);
+		else 
+			ret = (SSL_SESSION *)dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, s->session_ctx->get_session_cb, s,session_id,len,&copy, NULL, NULL);
+
 		// if ((ret=s->session_ctx->get_session_cb(s,session_id,len,&copy)))
-		ret = (SSL_SESSION *)dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, s->session_ctx->get_session_cb, s,session_id,len,&copy, NULL, NULL);
 		if (ret)
 			{
 			s->session_ctx->stats.sess_cb_hit++;

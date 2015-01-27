@@ -180,8 +180,11 @@ ATTR_DASICS_LEVEL1 int ssl23_accept(SSL *s)
 			s->server=1;
 			if (cb != NULL)
 			{
-				dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, cb, s,SSL_CB_HANDSHAKE_START,1, NULL, NULL, NULL);
-				//  cb(s,SSL_CB_HANDSHAKE_START,1);
+				if (!umaincall_helper)
+					cb(s,SSL_CB_HANDSHAKE_START,1);
+				else 
+					dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, cb, s,SSL_CB_HANDSHAKE_START,1, NULL, NULL, NULL);
+				
 			}
 
 			/* s->version=SSL3_VERSION; */
@@ -229,8 +232,10 @@ ATTR_DASICS_LEVEL1 int ssl23_accept(SSL *s)
 			{
 			new_state=s->state;
 			s->state=state;
-			dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, cb, s, SSL_CB_ACCEPT_LOOP, 1, NULL, NULL, NULL);
-			// cb(s,SSL_CB_ACCEPT_LOOP,1);
+			if (!umaincall_helper)
+				cb(s,SSL_CB_ACCEPT_LOOP,1);
+			else 
+				dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, cb, s, SSL_CB_ACCEPT_LOOP, 1, NULL, NULL, NULL);
 			s->state=new_state;
 			}
 		}
@@ -238,8 +243,11 @@ end:
 	s->in_handshake--;
 	if (cb != NULL)
 	{
-		dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, cb, s, SSL_CB_ACCEPT_EXIT, ret, NULL, NULL, NULL);
-		// cb(s,SSL_CB_ACCEPT_EXIT,ret);
+		if (!umaincall_helper)
+			cb(s,SSL_CB_ACCEPT_EXIT,ret);
+		else
+			dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, cb, s, SSL_CB_ACCEPT_EXIT, ret, NULL, NULL, NULL);
+		
 	}
 		
 	return(ret);

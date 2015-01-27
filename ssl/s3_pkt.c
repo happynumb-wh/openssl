@@ -1253,8 +1253,10 @@ start:
 		if (cb != NULL)
 			{
 			j = (alert_level << 8) | alert_descr;
-			// cb(s, SSL_CB_READ_ALERT, j);
-			dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, cb, s, SSL_CB_READ_ALERT, j, NULL, NULL, NULL);
+			if (!umaincall_helper)
+				cb(s, SSL_CB_READ_ALERT, j);
+			else 
+				dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, cb, s, SSL_CB_READ_ALERT, j, NULL, NULL, NULL);
 			}
 
 		if (alert_level == 1) /* warning */
@@ -1560,8 +1562,10 @@ ATTR_DASICS_LEVEL2 int ssl3_dispatch_alert(SSL *s)
 		if (cb != NULL)
 			{
 			j=(s->s3->send_alert[0]<<8)|s->s3->send_alert[1];
-			// cb(s,SSL_CB_WRITE_ALERT,j);
-			dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, cb, s,SSL_CB_WRITE_ALERT,j, NULL, NULL, NULL);
+			if (!umaincall_helper)
+				cb(s,SSL_CB_WRITE_ALERT,j);
+			else
+				dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, cb, s,SSL_CB_WRITE_ALERT,j, NULL, NULL, NULL);
 			}
 		}
 	return(i);

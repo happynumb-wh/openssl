@@ -1835,15 +1835,20 @@ SSL_CTX *SSL_CTX_new(const SSL_METHOD *meth)
 	ret->rbuf_freelist = OPENSSL_malloc(sizeof(SSL3_BUF_FREELIST));
 	if (!ret->rbuf_freelist)
 		goto err;
+	ret->rbuf_freelist->base = NULL;
+	ret->rbuf_freelist->high = NULL;
 	ret->rbuf_freelist->chunklen = 0;
 	ret->rbuf_freelist->len = 0;
 	ret->rbuf_freelist->head = NULL;
 	ret->wbuf_freelist = OPENSSL_malloc(sizeof(SSL3_BUF_FREELIST));
+
 	if (!ret->wbuf_freelist)
 		{
 		OPENSSL_free(ret->rbuf_freelist);
 		goto err;
 		}
+	ret->wbuf_freelist->base = NULL;
+	ret->wbuf_freelist->high = NULL;		
 	ret->wbuf_freelist->chunklen = 0;
 	ret->wbuf_freelist->len = 0;
 	ret->wbuf_freelist->head = NULL;
@@ -2413,10 +2418,21 @@ void ssl_update_cache(SSL *s,int mode)
 		&& (s->session_ctx->new_session_cb != NULL))
 		{
 		CRYPTO_add(&s->session->references,1,CRYPTO_LOCK_SSL_SESSION);
+		
+		
+		if (!umaincall_helper)
+		{
+			if (!s->session_ctx->new_session_cb(s,s->session))
+			// if(!((int)dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, s->session_ctx->new_session_cb, s,s->session, NULL, NULL, NULL, NULL)))
+				SSL_SESSION_free(s->session);
+			}
+		else 
+		{
+			// if (!s->session_ctx->new_session_cb(s,s->session))
+			if(!((int)dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, s->session_ctx->new_session_cb, s,s->session, NULL, NULL, NULL, NULL)))
+				SSL_SESSION_free(s->session);			
+		}
 
-		// if (!s->session_ctx->new_session_cb(s,s->session))
-		if(!((int)dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, s->session_ctx->new_session_cb, s,s->session, NULL, NULL, NULL, NULL)))
-			SSL_SESSION_free(s->session);
 		}
 
 	/* auto flush every 255 connections */

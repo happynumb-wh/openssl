@@ -1822,6 +1822,7 @@ int ssl_prepare_clienthello_tlsext(SSL *s)
 	return 1;
 	}
 #include "uwrapper.h"
+#include "uattr.h"
 int ssl_prepare_serverhello_tlsext(SSL *s)
 	{
 #ifndef OPENSSL_NO_EC
@@ -1869,8 +1870,10 @@ int ssl_check_clienthello_tlsext_early(SSL *s)
 
 	if (s->ctx != NULL && s->ctx->tlsext_servername_callback != 0) 
 	{
-		// ret = s->ctx->tlsext_servername_callback(s, &al, s->ctx->tlsext_servername_arg);
-		ret = (int)dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, s->ctx->tlsext_servername_callback, s, &al, s->ctx->tlsext_servername_arg, NULL, NULL, NULL);
+		if (!umaincall_helper)
+			ret = s->ctx->tlsext_servername_callback(s, &al, s->ctx->tlsext_servername_arg);
+		else 
+			ret = (int)dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, s->ctx->tlsext_servername_callback, s, &al, s->ctx->tlsext_servername_arg, NULL, NULL, NULL);
 	}
 	else if (s->initial_ctx != NULL && s->initial_ctx->tlsext_servername_callback != 0) 		
 		ret = s->initial_ctx->tlsext_servername_callback(s, &al, s->initial_ctx->tlsext_servername_arg);

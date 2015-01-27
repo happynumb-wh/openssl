@@ -3,7 +3,7 @@
 #include "csr.h"
 #include "uattr.h"
 
-uint64_t umaincall_helper;
+uint64_t umaincall_helper = 0;
 
 ATTR_DASICS_LEVEL1 int32_t dasics_ulib_libcfg_alloc(uint64_t cfg, uint64_t lo, uint64_t hi) {
     lo = ROUNDDOWN(lo, 0x8);

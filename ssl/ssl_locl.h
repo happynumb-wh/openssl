@@ -599,6 +599,8 @@ typedef struct ssl3_comp_st
 #ifndef OPENSSL_NO_BUF_FREELISTS
 typedef struct ssl3_buf_freelist_st
 	{
+	void * base;
+	void * high;
 	size_t chunklen;
 	unsigned int len;
 	struct ssl3_buf_freelist_entry_st *head;

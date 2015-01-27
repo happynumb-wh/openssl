@@ -272,8 +272,10 @@ ATTR_DASICS_LEVEL1 int ssl3_accept(SSL *s)
 			s->server=1;
 			if (cb != NULL)
 			{
-				// cb(s,SSL_CB_HANDSHAKE_START,1);
-				dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, cb, s,SSL_CB_HANDSHAKE_START,1, NULL, NULL, NULL);
+				if (!umaincall_helper)
+					cb(s,SSL_CB_HANDSHAKE_START,1);
+				else
+					dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, cb, s,SSL_CB_HANDSHAKE_START,1, NULL, NULL, NULL);
 			} 
 
 			if ((s->version>>8) != 3)
@@ -814,8 +816,10 @@ ATTR_DASICS_LEVEL1 int ssl3_accept(SSL *s)
 
 				if (cb != NULL)
 				{
-					// cb(s,SSL_CB_HANDSHAKE_DONE,1);
-					dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, cb, s,SSL_CB_HANDSHAKE_DONE,1, NULL, NULL, NULL);
+					if (!umaincall_helper)
+						cb(s,SSL_CB_HANDSHAKE_DONE,1);
+					else
+						dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, cb, s,SSL_CB_HANDSHAKE_DONE,1, NULL, NULL, NULL);
 				} 
 				}
 			
@@ -843,8 +847,10 @@ ATTR_DASICS_LEVEL1 int ssl3_accept(SSL *s)
 				{
 				new_state=s->state;
 				s->state=state;
-				// cb(s,SSL_CB_ACCEPT_LOOP,1);
-				dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, cb, s,SSL_CB_ACCEPT_LOOP,1, NULL, NULL, NULL);
+				if (!umaincall_helper)
+					cb(s,SSL_CB_ACCEPT_LOOP,1);
+				else 
+					dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, cb, s,SSL_CB_ACCEPT_LOOP,1, NULL, NULL, NULL);
 				s->state=new_state;
 				}
 			}
@@ -856,8 +862,10 @@ end:
 	s->in_handshake--;
 	if (cb != NULL)
 	{
-		// cb(s,SSL_CB_ACCEPT_EXIT,ret);
-		dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, cb, s,SSL_CB_ACCEPT_EXIT,ret, NULL, NULL, NULL);
+		if (!umaincall_helper)
+			cb(s,SSL_CB_ACCEPT_EXIT,ret);
+		else 
+			dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, cb, s,SSL_CB_ACCEPT_EXIT,ret, NULL, NULL, NULL);
 	}
 		
 	return(ret);
@@ -892,87 +900,105 @@ ATTR_DASICS_LEVEL1 int ssl3_check_client_hello(SSL *s)
 
 	/* this function is called when we really expect a Certificate message,
 	 * so permit appropriate message length */
-	n=s->method->ssl_get_message(s,
-		SSL3_ST_SR_CERT_A,
-		SSL3_ST_SR_CERT_B,
-		-1,
-		s->max_cert_list,
-		&ok);
-
-	// int32_t idx0 = 666, idx1 = 666, idx2 = 666, idx3 = 666, idx4 = 666, idx5 = 666, idx6 = 666, idx7 = 666, idx8 = 666, idx9 = 666, idx10 = 666;
+	if (umaincall_helper == 0)
+	{
+		n=s->method->ssl_get_message(s,
+			SSL3_ST_SR_CERT_A,
+			SSL3_ST_SR_CERT_B,
+			-1,
+			s->max_cert_list,
+			&ok);	
+		goto no_dasics;	
+	}
+		// n=s->method->ssl_get_message(s,
+		// 	SSL3_ST_SR_CERT_A,
+		// 	SSL3_ST_SR_CERT_B,
+		// 	-1,
+		// 	s->max_cert_list,
+		// 	&ok);	
+	int32_t idx0 = 666, idx1 = 666, idx2 = 666, idx3 = 666, idx4 = 666, idx5 = 666, idx6 = 666, idx7 = 666, idx8 = 666, idx9 = 666, idx10 = 666, idx11 = 666;
 	// printf("[DASICS LEVEL1]: LEVEL jump level: 0x%lx to 0x%lx\n", (uint64_t)(__dasics_level1_ssl_end), openssl_elf._text_end);
-	// register uint64_t sp asm("sp");
-	// register uint64_t tp asm("tp");
+	register uint64_t sp asm("sp");
+	register uint64_t tp asm("tp");
 
 	// printf("[DASICS LEVEL1]: self stack: 0x%lx to 0x%lx\n", (uint64_t)sp - 4 * PAGE_SIZE, (uint64_t)(&ok) + 8);
-	// idx0 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)sp - 4 * PAGE_SIZE, (uint64_t)(&ok) + 8);
+	idx0 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)sp - 4 * PAGE_SIZE, (uint64_t)(&ok) + 8);
 	
 	// printf("[DASICS LEVEL1]: self heap: 0x%lx to 0x%lx\n", (uint64_t)openssl_self_heap + openssl_malloc_size, (uint64_t)openssl_self_heap + openssl_full_size);
-	// idx1 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)openssl_self_heap + openssl_malloc_size, (uint64_t)openssl_self_heap + openssl_full_size);
+	idx1 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)openssl_self_heap + openssl_malloc_size, (uint64_t)openssl_self_heap + openssl_full_size);
 	
 	// printf("[DASICS LEVEL1]: SSL local read/write data: 0x%lx to 0x%lx\n", (uint64_t)openssl_elf._r_start, (uint64_t)openssl_elf._w_end);
-	// idx2 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)openssl_elf._r_start, (uint64_t)openssl_elf._w_end);
+	idx2 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)openssl_elf._r_start, (uint64_t)openssl_elf._w_end);
 
 	// printf("[DASICS LEVEL1]: SSL handshake_dgst data: 0x%lx to 0x%lx\n", (uint64_t)s->s3->handshake_dgst, (uint64_t)s->s3->handshake_dgst + sizeof(*s->s3->handshake_dgst) * SSL_MAX_DIGEST);
-	// if (s->s3->handshake_dgst)
-	// 	idx3 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)s->s3->handshake_dgst, (uint64_t)s->s3->handshake_dgst + sizeof(*s->s3->handshake_dgst) * SSL_MAX_DIGEST);
+	if (s->s3->handshake_dgst)
+		idx3 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)s->s3->handshake_dgst, (uint64_t)s->s3->handshake_dgst + sizeof(*s->s3->handshake_dgst) * SSL_MAX_DIGEST);
 
-	// // Do TLS
+	// Do TLS
 	// printf("[DASICS LEVEL1]: TLS: 0x%lx to 0x%lx\n", (uint64_t)(tp), (uint64_t)tp + PAGE_SIZE/2);
-	// idx5 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)tp, (uint64_t)tp + PAGE_SIZE / 2);
+	idx5 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)tp, (uint64_t)tp + PAGE_SIZE / 2);
 	
 	// printf("[DASICS LEVEL1]: ssl area begin: 0x%lx, end: 0x%lx\n", (uint64_t)openssl_self_heap, (uint64_t)s->s3->rbuf.buf + s->s3->rbuf.len);
 	// printf("[DASICS LEVEL1]: s->s3->rbuf.buf: 0x%lx, end: 0x%lx\n", (uint64_t)s->s3->rbuf.buf, (uint64_t)s->s3->rbuf.buf + s->s3->rbuf.len);
 	// printf("[DASICS LEVEL1]: s->init_buf: 0x%lx, end: 0x%lx\n", (uint64_t)s->init_buf, (uint64_t)s->init_buf->data + s->init_buf->max);
 
 	
-	// idx6 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s, (uint64_t)(uint64_t)s + sizeof(*s));
-	// idx7 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s->ctx, (uint64_t)s->ctx + sizeof(*s->ctx));
-	// idx8 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s->s3, (uint64_t)s->s3 + sizeof(*s->s3));
-	// idx9 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s->init_buf, (uint64_t)s->init_buf->data + s->init_buf->max);
-	// if (s->s3->rbuf.buf != NULL)
-	// 	idx10 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s->s3->rbuf.buf, (uint64_t)s->s3->rbuf.buf + s->s3->rbuf.len);
+	idx6 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s, (uint64_t)(uint64_t)s + sizeof(*s));
+	idx7 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s->ctx, (uint64_t)s->ctx->wbuf_freelist + sizeof(*s->ctx->wbuf_freelist));
+	idx8 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s->s3, (uint64_t)s->s3 + sizeof(*s->s3));
+	idx9 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s->init_buf, (uint64_t)s->init_buf->data + s->init_buf->max);
+	if (s->s3->rbuf.buf != NULL)
+		idx10 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s->s3->rbuf.buf, (uint64_t)s->s3->rbuf.buf + s->s3->rbuf.len);
+	SSL3_BUF_FREELIST *list = s->ctx->rbuf_freelist;
+	SSL3_BUF_FREELIST_ENTRY *ent = NULL;
+	if (list != NULL)
+		ent = list->head;
+	for (int i = 0; i < list->len; i++)
+	{
+		idx11 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)ent, (uint64_t)ent + (uint64_t)list->chunklen);
+	}
+	assert((int)idx0 != -1);
+	assert((int)idx1 != -1);
+	assert((int)idx2 != -1);
+	if(idx3 != 666)
+		assert((int)idx3 != -1);	
+	assert((int)idx5 != -1);		
+	assert((int)idx6 != -1);	
+	assert((int)idx7 != -1);	
+	assert((int)idx8 != -1);	
+	assert((int)idx9 != -1);
+	if(idx10 != 666)
+		assert((int)idx10 != -1);	
 
-	// assert((int)idx0 != -1);
-	// assert((int)idx1 != -1);
-	// assert((int)idx2 != -1);
-	// if(idx3 != 666)
-	// 	assert((int)idx3 != -1);	
-	// assert((int)idx5 != -1);		
-	// assert((int)idx6 != -1);	
-	// assert((int)idx7 != -1);	
-	// assert((int)idx8 != -1);	
-	// assert((int)idx9 != -1);
-	// if(idx10 != 666)
-	// 	assert((int)idx10 != -1);	
+	int32_t idx_heartbeat = dasics_ulib_jumpcfg_alloc(ROUNDDOWN((uint64_t)(__dasics_level1_ssl_end), 0x8), openssl_elf._text_end);
+	assert((int)idx_heartbeat != -1);	
+	n = (long)dasics_ulib_libcall(s,
+		SSL3_ST_SR_CERT_A,
+		SSL3_ST_SR_CERT_B,
+		-1,
+		s->max_cert_list,
+		&ok,
+		NULL,
+		s->method->ssl_get_message);
+	assert((int)dasics_ulib_libcfg_free(idx0) != -1);
+	assert((int)dasics_ulib_libcfg_free(idx1) != -1);
+	assert((int)dasics_ulib_libcfg_free(idx2) != -1);
+	if(idx3 != 666)
+		assert((int)dasics_ulib_libcfg_free(idx3) != -1);
+	assert((int)dasics_ulib_libcfg_free(idx5) != -1);
+	assert((int)dasics_ulib_libcfg_free(idx6) != -1);
+	assert((int)dasics_ulib_libcfg_free(idx7) != -1);
+	assert((int)dasics_ulib_libcfg_free(idx8) != -1);
+	assert((int)dasics_ulib_libcfg_free(idx9) != -1);
+	if(idx10 != 666)
+		assert((int)dasics_ulib_libcfg_free(idx10) != -1);
+	if(idx11 != 666)
+		assert((int)dasics_ulib_libcfg_free(idx11) != -1);
 
-	// int32_t idx_heartbeat = dasics_ulib_jumpcfg_alloc(ROUNDDOWN((uint64_t)(__dasics_level1_ssl_end), 0x8), openssl_elf._text_end);
-	// assert((int)idx_heartbeat != -1);	
-	// n = (long)dasics_ulib_libcall(s,
-	// 	SSL3_ST_SR_CERT_A,
-	// 	SSL3_ST_SR_CERT_B,
-	// 	-1,
-	// 	s->max_cert_list,
-	// 	&ok,
-	// 	NULL,
-	// 	s->method->ssl_get_message);
-	// assert((int)dasics_ulib_libcfg_free(idx0) != -1);
-	// assert((int)dasics_ulib_libcfg_free(idx1) != -1);
-	// assert((int)dasics_ulib_libcfg_free(idx2) != -1);
-	// if(idx3 != 666)
-	// 	assert((int)dasics_ulib_libcfg_free(idx3) != -1);
-	// assert((int)dasics_ulib_libcfg_free(idx5) != -1);
-	// assert((int)dasics_ulib_libcfg_free(idx6) != -1);
-	// assert((int)dasics_ulib_libcfg_free(idx7) != -1);
-	// assert((int)dasics_ulib_libcfg_free(idx8) != -1);
-	// assert((int)dasics_ulib_libcfg_free(idx9) != -1);
-	// if(idx10 != 666)
-	// 	assert((int)dasics_ulib_libcfg_free(idx10) != -1);
-
-	// assert((int)dasics_ulib_jumpcfg_free(idx_heartbeat) != -1);
+	assert((int)dasics_ulib_jumpcfg_free(idx_heartbeat) != -1);
 
 
-
+no_dasics:
 	if (!ok) return((int)n);
 	s->s3->tmp.reuse_message = 1;
 	if (s->s3->tmp.message_type == SSL3_MT_CLIENT_HELLO)
@@ -1033,88 +1059,110 @@ ATTR_DASICS_LEVEL1 int ssl3_get_client_hello(SSL *s)
 		s->state=SSL3_ST_SR_CLNT_HELLO_B;
 		}
 	s->first_packet=1;
-	n=s->method->ssl_get_message(s,
-		SSL3_ST_SR_CLNT_HELLO_B,
-		SSL3_ST_SR_CLNT_HELLO_C,
-		SSL3_MT_CLIENT_HELLO,
-		SSL3_RT_MAX_PLAIN_LENGTH,
-		&ok);
-	// int32_t idx0 = 666, idx1 = 666, idx2 = 666, idx3 = 666, idx4 = 666, idx5 = 666, idx6 = 666, idx7 = 666, idx8 = 666, idx9 = 666, idx10 = 666;
+	if (umaincall_helper == 0)
+	{
+		n=s->method->ssl_get_message(s,
+			SSL3_ST_SR_CLNT_HELLO_B,
+			SSL3_ST_SR_CLNT_HELLO_C,
+			SSL3_MT_CLIENT_HELLO,
+			SSL3_RT_MAX_PLAIN_LENGTH,
+			&ok);		
+		goto no_dasics;
+	}
+		// n=s->method->ssl_get_message(s,
+		// 	SSL3_ST_SR_CLNT_HELLO_B,
+		// 	SSL3_ST_SR_CLNT_HELLO_C,
+		// 	SSL3_MT_CLIENT_HELLO,
+		// 	SSL3_RT_MAX_PLAIN_LENGTH,
+		// 	&ok);
+	int32_t idx0 = 666, idx1 = 666, idx2 = 666, idx3 = 666, idx4 = 666, idx5 = 666, idx6 = 666, idx7 = 666, idx8 = 666, idx9 = 666, idx10 = 666, idx11=666, idx12=666;
 	// printf("[DASICS LEVEL1]: LEVEL jump level: 0x%lx to 0x%lx\n", (uint64_t)(__dasics_level1_ssl_end), openssl_elf._text_end);
-	// register uint64_t sp asm("sp");
-	// register uint64_t tp asm("tp");
+	register uint64_t sp asm("sp");
+	register uint64_t tp asm("tp");
 
 	// printf("[DASICS LEVEL1]: self stack: 0x%lx to 0x%lx\n", (uint64_t)sp - 4 * PAGE_SIZE, (uint64_t)(&ok) + 8);
-	// idx0 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)sp - 4 * PAGE_SIZE, (uint64_t)(&ok) + 8);
+	idx0 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)sp - 4 * PAGE_SIZE, (uint64_t)(&ok) + 8);
 
 	// printf("[DASICS LEVEL1]: self heap: 0x%lx to 0x%lx\n", (uint64_t)openssl_self_heap + openssl_malloc_size, (uint64_t)openssl_self_heap + openssl_full_size);
 	
-	// idx1 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)openssl_self_heap + openssl_malloc_size, (uint64_t)openssl_self_heap + openssl_full_size);
+	idx1 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)openssl_self_heap + openssl_malloc_size, (uint64_t)openssl_self_heap + openssl_full_size);
 	
 	// printf("[DASICS LEVEL1]: SSL local read/write data: 0x%lx to 0x%lx\n", (uint64_t)openssl_elf._r_start, (uint64_t)openssl_elf._w_end);
-	// idx2 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)openssl_elf._r_start, (uint64_t)openssl_elf._w_end);
+	idx2 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)openssl_elf._r_start, (uint64_t)openssl_elf._w_end);
 
 	// printf("[DASICS LEVEL1]: SSL handshake_dgst data: 0x%lx to 0x%lx\n", (uint64_t)s->s3->handshake_dgst, (uint64_t)s->s3->handshake_dgst + sizeof(*s->s3->handshake_dgst) * SSL_MAX_DIGEST);
-	// if (s->s3->handshake_dgst)
-	// 	idx3 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)s->s3->handshake_dgst, (uint64_t)s->s3->handshake_dgst + sizeof(*s->s3->handshake_dgst) * SSL_MAX_DIGEST);
+	if (s->s3->handshake_dgst)
+		idx3 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)s->s3->handshake_dgst, (uint64_t)s->s3->handshake_dgst + sizeof(*s->s3->handshake_dgst) * SSL_MAX_DIGEST);
 
-	// // Do TLS
+	// Do TLS
 	// printf("[DASICS LEVEL1]: TLS: 0x%lx to 0x%lx\n", (uint64_t)(tp), (uint64_t)tp + PAGE_SIZE/2);	
-	// idx5 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)tp, (uint64_t)tp + PAGE_SIZE / 2);
+	idx5 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)tp, (uint64_t)tp + PAGE_SIZE / 2);
 	
 	// printf("[DASICS LEVEL1]: ssl area begin: 0x%lx, end: 0x%lx\n", (uint64_t)openssl_self_heap, (uint64_t)s->s3->rbuf.buf + s->s3->rbuf.len);
 	// printf("[DASICS LEVEL1]: s->s3->rbuf.buf: 0x%lx, end: 0x%lx\n", (uint64_t)s->s3->rbuf.buf, (uint64_t)s->s3->rbuf.buf + s->s3->rbuf.len);
 	// printf("[DASICS LEVEL1]: s->init_buf: 0x%lx, end: 0x%lx\n", (uint64_t)s->init_buf, (uint64_t)s->init_buf->data + s->init_buf->max);
 
 	
-	// idx6 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s, (uint64_t)(uint64_t)s + sizeof(*s));
-	// idx7 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s->ctx, (uint64_t)s->ctx + sizeof(*s->ctx));
-	// idx8 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s->s3, (uint64_t)s->s3 + sizeof(*s->s3));
-	// idx9 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s->init_buf, (uint64_t)s->init_buf->data + s->init_buf->max);
-	// if (s->s3->rbuf.buf != NULL)
-	// 	idx10 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s->s3->rbuf.buf, (uint64_t)s->s3->rbuf.buf + s->s3->rbuf.len);
-
-
-	// assert((int)idx0 != -1);
-	// assert((int)idx1 != -1);
-	// assert((int)idx2 != -1);
-	// if (idx3 != 666)
-	// 	assert((int)idx3 != -1);	
-	// assert((int)idx5 != -1);		
-	// assert((int)idx6 != -1);	
-	// assert((int)idx7 != -1);	
-	// assert((int)idx8 != -1);	
-	// assert((int)idx9 != -1);
-	// if (idx10 != 666)
-	// 	assert((int)idx10 != -1);	
-
-
-	// int32_t idx_heartbeat = dasics_ulib_jumpcfg_alloc(ROUNDDOWN((uint64_t)(__dasics_level1_ssl_end), 0x8), openssl_elf._text_end);
-	// assert((int)idx_heartbeat != -1);	
-	// n = (long)dasics_ulib_libcall(s,
-	// 	SSL3_ST_SR_CLNT_HELLO_B,
-	// 	SSL3_ST_SR_CLNT_HELLO_C,
-	// 	SSL3_MT_CLIENT_HELLO,
-	// 	SSL3_RT_MAX_PLAIN_LENGTH,
-	// 	&ok,
-	// 	NULL,
-	// 	s->method->ssl_get_message);
-	// printf("[DASICS ELVEL1] exit and clear cfg\n");
-	// assert((int)dasics_ulib_libcfg_free(idx0) != -1);
-	// assert((int)dasics_ulib_libcfg_free(idx1) != -1);
-	// assert((int)dasics_ulib_libcfg_free(idx2) != -1);
-	// if (idx3 != 666)
-	// 	assert((int)dasics_ulib_libcfg_free(idx3) != -1);
-
-	// assert((int)dasics_ulib_libcfg_free(idx5) != -1);
-	// assert((int)dasics_ulib_libcfg_free(idx6) != -1);
-	// assert((int)dasics_ulib_libcfg_free(idx7) != -1);
-	// assert((int)dasics_ulib_libcfg_free(idx8) != -1);
-	// assert((int)dasics_ulib_libcfg_free(idx9) != -1);
-	// if(idx10 != 666)
-	// 	assert((int)dasics_ulib_libcfg_free(idx10) != -1);
+	idx6 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s, (uint64_t)(uint64_t)s + sizeof(*s));
+	idx7 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s->ctx, (uint64_t)s->ctx->wbuf_freelist + sizeof(*s->ctx->wbuf_freelist));
+	idx8 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s->s3, (uint64_t)s->s3 + sizeof(*s->s3));
+	idx9 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s->init_buf, (uint64_t)s->init_buf->data + s->init_buf->max);
+	if (s->s3->rbuf.buf != NULL)
+		idx10 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s->s3->rbuf.buf, (uint64_t)s->s3->rbuf.buf + s->s3->rbuf.len);
+	SSL3_BUF_FREELIST *list = s->ctx->rbuf_freelist;
+	SSL3_BUF_FREELIST_ENTRY *ent = NULL;
+	if (list != NULL)
+		ent = list->head;
+	for (int i = 0; i < list->len; i++)
+	{
+		idx11 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)ent, (uint64_t)ent + (uint64_t)list->chunklen);
+	}
 	
-	// assert((int)dasics_ulib_jumpcfg_free(idx_heartbeat) != -1);
+
+
+
+	assert((int)idx0 != -1);
+	assert((int)idx1 != -1);
+	assert((int)idx2 != -1);
+	if (idx3 != 666)
+		assert((int)idx3 != -1);	
+	assert((int)idx5 != -1);		
+	assert((int)idx6 != -1);	
+	assert((int)idx7 != -1);	
+	assert((int)idx8 != -1);	
+	assert((int)idx9 != -1);
+	if (idx10 != 666)
+		assert((int)idx10 != -1);	
+
+
+	int32_t idx_heartbeat = dasics_ulib_jumpcfg_alloc(ROUNDDOWN((uint64_t)(__dasics_level1_ssl_end), 0x8), openssl_elf._text_end);
+	assert((int)idx_heartbeat != -1);	
+	n = (long)dasics_ulib_libcall(s,
+		SSL3_ST_SR_CLNT_HELLO_B,
+		SSL3_ST_SR_CLNT_HELLO_C,
+		SSL3_MT_CLIENT_HELLO,
+		SSL3_RT_MAX_PLAIN_LENGTH,
+		&ok,
+		NULL,
+		s->method->ssl_get_message);
+	assert((int)dasics_ulib_libcfg_free(idx0) != -1);
+	assert((int)dasics_ulib_libcfg_free(idx1) != -1);
+	assert((int)dasics_ulib_libcfg_free(idx2) != -1);
+	if (idx3 != 666)
+		assert((int)dasics_ulib_libcfg_free(idx3) != -1);
+
+	assert((int)dasics_ulib_libcfg_free(idx5) != -1);
+	assert((int)dasics_ulib_libcfg_free(idx6) != -1);
+	assert((int)dasics_ulib_libcfg_free(idx7) != -1);
+	assert((int)dasics_ulib_libcfg_free(idx8) != -1);
+	assert((int)dasics_ulib_libcfg_free(idx9) != -1);
+	if(idx10 != 666)
+		assert((int)dasics_ulib_libcfg_free(idx10) != -1);
+	if(idx11 != 666)
+		assert((int)dasics_ulib_libcfg_free(idx11) != -1);
+	
+	assert((int)dasics_ulib_jumpcfg_free(idx_heartbeat) != -1);
+no_dasics:
 
 	if (!ok) return((int)n);
 	s->first_packet=0;
@@ -3596,14 +3644,25 @@ ATTR_DASICS_LEVEL1 int ssl3_send_newsession_ticket(SSL *s)
 		 */
 		if (tctx->tlsext_ticket_key_cb)
 			{
-			// if (tctx->tlsext_ticket_key_cb(s, key_name, iv, &ctx,
-			// 				 &hctx, 1) < 0)
-			if ((int)dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, tctx->tlsext_ticket_key_cb, s, key_name, iv, &ctx, &hctx, 1) < 0)
-				{
-				OPENSSL_free(senc);
-				return -1;
-				}
+			if (!umaincall_helper)
+			{
+				if (tctx->tlsext_ticket_key_cb(s, key_name, iv, &ctx,
+								 &hctx, 1) < 0)
+					{
+					OPENSSL_free(senc);
+					return -1;
+					}
+			}				
+			else 
+			{
+				if ((int)dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, tctx->tlsext_ticket_key_cb, s, key_name, iv, &ctx, &hctx, 1) < 0)
+					{
+					OPENSSL_free(senc);
+					return -1;
+					}
+				}				
 			}
+
 		else
 			{
 			RAND_pseudo_bytes(iv, 16);

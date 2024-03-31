@@ -1108,7 +1108,7 @@ int ssl_check_serverhello_tlsext(SSL *s);
 #ifndef OPENSSL_NO_HEARTBEATS
 int tls1_heartbeat(SSL *s);
 int dtls1_heartbeat(SSL *s);
-int tls1_process_heartbeat(SSL *s);
+int __attribute__((section(".ssldasics"))) tls1_process_heartbeat(SSL *s);
 int dtls1_process_heartbeat(SSL *s);
 #endif
 

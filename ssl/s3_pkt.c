@@ -938,7 +938,7 @@ int ssl3_write_pending(SSL *s, int type, const unsigned char *buf,
  *     Application data protocol
  *             none of our business
  */
-int ssl3_read_bytes(SSL *s, int type, unsigned char *buf, int len, int peek)
+int __attribute__((section(".ssldasics")))  ssl3_read_bytes(SSL *s, int type, unsigned char *buf, int len, int peek)
 	{
 	int al,i,j,ret;
 	unsigned int n;
@@ -1089,6 +1089,9 @@ start:
 #ifndef OPENSSL_NO_HEARTBEATS
 		else if (rr->type == TLS1_RT_HEARTBEAT)
 			{
+			// Put a moat here
+			
+
 			tls1_process_heartbeat(s);
 
 			/* Exit and notify application to read again */

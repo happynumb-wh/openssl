@@ -2550,7 +2550,7 @@ int tls1_process_sigalgs(SSL *s, const unsigned char *data, int dsize)
 #endif
 
 #ifndef OPENSSL_NO_HEARTBEATS
-int  __attribute__((section(".ssldasics"))) 
+int
 tls1_process_heartbeat(SSL *s)
 	{
 	unsigned char *p = &s->s3->rrec.data[0], *pl;

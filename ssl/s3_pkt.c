@@ -1090,9 +1090,40 @@ start:
 		else if (rr->type == TLS1_RT_HEARTBEAT)
 			{
 			// Put a moat here
-			
+#include "udasics.h"
+#include "uwrapper.h"
+		#define TASK_SIZE 0X4000000000
+		/* Rounding; only works for n = power of two */
+		#define ROUND(a, n)     (((((uint64_t)(a))+(n)-1)) & ~((n)-1))
 
+		#define ROUNDDOWN(a, n) (((uint64_t)(a)) & ~((n)-1))
+
+			extern uint64_t __dasics_ssl_begin[];
+			extern uint64_t __dasics_ssl_end[];
+			// a moat <= 256 byte
+			uint64_t moat_low = ROUND((uint64_t)(&s->s3->rrec.data[0]) + s->s3->rrec.length, 8);
+			uint64_t moat_hi = ROUNDDOWN((uint64_t)(&s->s3->rrec.data[0]) + s->s3->rrec.length + 256, 8);
+
+			printf("[DASICS log]: Recv heart pkt from 0x%lx to 0x%lx\n", (uint64_t)(&s->s3->rrec.data[0]), moat_low);
+			printf("[DASICS log]: Call tls1_process_heartbeat\n");
+
+			//SET tls1_process_heartbeat moat
+			int idx0, idx1, idx2, idx3;
+
+			idx0 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)0, (uint64_t)(moat_low));
+			idx1 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)moat_hi, (uint64_t)(TASK_SIZE));
+			int32_t idx_heartbeat = dasics_ulib_jumpcfg_alloc(ROUNDDOWN((uint64_t)(&__dasics_ssl_end), 0x8), TASK_SIZE);
+
+
+			// dasics_ulib_libcall(s, 0, 0, 0, &tls1_process_heartbeat);
 			tls1_process_heartbeat(s);
+
+			printf("[DASICS log]:Return tls1_process_heartbeat \n");
+
+			//FREE
+			dasics_ulib_libcfg_free(idx1);
+			dasics_ulib_libcfg_free(idx0);
+			dasics_ulib_jumpcfg_free(idx_heartbeat);
 
 			/* Exit and notify application to read again */
 			rr->length = 0;

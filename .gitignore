@@ -75,3 +75,4 @@
 lib
 Makefile.save
 *.bak
+!include/asm

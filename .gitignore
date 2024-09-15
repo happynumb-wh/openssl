@@ -76,3 +76,6 @@ lib
 Makefile.save
 *.bak
 !include/asm
+.vscode
+.openssl
+crypto.txt

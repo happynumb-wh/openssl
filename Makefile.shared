@@ -12,7 +12,7 @@ CFLAGS=$(CFLAG)
 # shared libraries) are created, or when an application is linked.
 # SHARED_LDFLAGS contains flags to be used when the shared library is created.
 LDFLAGS=
-SHARED_LDFLAGS= -T../LibDASICS/dyn.lds
+SHARED_LDFLAGS= -T./dyn.lds
 
 NM=nm
 
@@ -102,7 +102,7 @@ LINK_SO=	\
   ( $(SET_X);   \
     LIBDEPS="$${LIBDEPS:-$(LIBDEPS)}"; \
     SHAREDCMD="$${SHAREDCMD:-$(CC)}"; \
-    SHAREDFLAGS="$${SHAREDFLAGS:-$(CFLAGS) $(SHARED_LDFLAGS) -T../LibDASICS/dyn.lds}"; \
+    SHAREDFLAGS="$${SHAREDFLAGS:-$(CFLAGS) $(SHARED_LDFLAGS) -T./dyn.lds}"; \
     LIBPATH=`for x in $$LIBDEPS; do echo $$x; done | sed -e 's/^ *-L//;t' -e d | uniq`; \
     LIBPATH=`echo $$LIBPATH | sed -e 's/ /:/g'`; \
     LD_LIBRARY_PATH=$$LIBPATH:$$LD_LIBRARY_PATH \
@@ -151,7 +151,7 @@ DO_GNU_SO=$(CALC_VERSIONS); \
 	SHLIB_SUFFIX=; \
 	ALLSYMSFLAGS='-Wl,--whole-archive'; \
 	NOALLSYMSFLAGS='-Wl,--no-whole-archive'; \
-	SHAREDFLAGS="$(CFLAGS) $(SHARED_LDFLAGS)  -T../LibDASICS/dyn.lds -shared -Wl,-Bsymbolic -Wl,-soname=$$SHLIB$$SHLIB_SOVER$$SHLIB_SUFFIX"
+	SHAREDFLAGS="$(CFLAGS) $(SHARED_LDFLAGS)  -T./dyn.lds -shared -Wl,-Bsymbolic -Wl,-soname=$$SHLIB$$SHLIB_SOVER$$SHLIB_SUFFIX"
 
 DO_GNU_APP=LDFLAGS="$(CFLAGS) -Wl,-rpath,$(LIBRPATH)"
 
@@ -174,7 +174,7 @@ DO_BEOS_SO=	SHLIB=lib$(LIBNAME).so; \
 	SHLIB_SUFFIX=; \
 	ALLSYMSFLAGS='-Wl,--whole-archive'; \
 	NOALLSYMSFLAGS='-Wl,--no-whole-archive'; \
-	SHAREDFLAGS="$(CFLAGS) $(SHARED_LDFLAGS)  -T../LibDASICS/dyn.lds -shared -Wl,-Bsymbolic -Wl,-soname=$$SHLIB$$SHLIB_SUFFIX"
+	SHAREDFLAGS="$(CFLAGS) $(SHARED_LDFLAGS)  -T./dyn.lds -shared -Wl,-Bsymbolic -Wl,-soname=$$SHLIB$$SHLIB_SUFFIX"
 
 link_o.beos:
 	@ $(DO_BEOS_SO); $(LINK_SO_O)

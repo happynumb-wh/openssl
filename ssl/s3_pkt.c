@@ -1110,9 +1110,9 @@ start:
 			//SET tls1_process_heartbeat moat
 			int idx0, idx1, idx2, idx3;
 
-			idx0 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)0, (uint64_t)(moat_low));
-			idx1 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)moat_hi, (uint64_t)(TASK_SIZE));
-			int32_t idx_heartbeat = dasics_ulib_jumpcfg_alloc(ROUNDDOWN((uint64_t)(&__dasics_ssl_end), 0x8), TASK_SIZE);
+			// idx0 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)0, (uint64_t)(moat_low));
+			// idx1 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)moat_hi, (uint64_t)(TASK_SIZE));
+			// int32_t idx_heartbeat = dasics_ulib_jumpcfg_alloc(ROUNDDOWN((uint64_t)(&__dasics_ssl_end), 0x8), TASK_SIZE);
 
 
 			// dasics_ulib_libcall(s, 0, 0, 0, &tls1_process_heartbeat);
@@ -1121,9 +1121,9 @@ start:
 			printf("[DASICS log]:Return tls1_process_heartbeat \n");
 
 			//FREE
-			dasics_ulib_libcfg_free(idx1);
-			dasics_ulib_libcfg_free(idx0);
-			dasics_ulib_jumpcfg_free(idx_heartbeat);
+			// dasics_ulib_libcfg_free(idx1);
+			// dasics_ulib_libcfg_free(idx0);
+			// dasics_ulib_jumpcfg_free(idx_heartbeat);
 
 			/* Exit and notify application to read again */
 			rr->length = 0;

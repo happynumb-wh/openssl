@@ -59,6 +59,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <openssl/crypto.h>
+#include <openssl/ssl.h>
 #include "cryptlib.h"
 
 
@@ -73,30 +74,44 @@ static int allow_customize_debug = 1;/* exchanging memory-related functions at
 
 
 /* the following pointers may be changed as long as 'allow_customize' is set */
+// typedef void *(*malloc_hook)(unsigned long, unsigned long ,unsigned long);
+// typedef void *(*realloc_hook)(unsigned long, unsigned long , void *, unsigned long);
+// typedef void (*free_hook)(unsigned long, unsigned long , void *);
 
 static void *(*malloc_func)(size_t)         = malloc;
+malloc_hook dasics_malloc_func         = NULL;
+
 static void *default_malloc_ex(size_t num, const char *file, int line)
-	{ return malloc_func(num); }
+	{ return dasics_malloc_func != NULL ? dasics_malloc_func(DASICS_HOOK_MAGIC, DASICS_MALLOC_HOOK, num) \
+				: malloc_func(num); }
 static void *(*malloc_ex_func)(size_t, const char *file, int line)
         = default_malloc_ex;
 
 static void *(*realloc_func)(void *, size_t)= realloc;
+realloc_hook dasics_realloc_func = NULL;
+
 static void *default_realloc_ex(void *str, size_t num,
         const char *file, int line)
-	{ return realloc_func(str,num); }
+	{ return dasics_realloc_func != NULL ? dasics_realloc_func(DASICS_HOOK_MAGIC, DASICS_REALLOC_HOOK, str, num) \
+			: realloc_func(str,num); }
 static void *(*realloc_ex_func)(void *, size_t, const char *file, int line)
         = default_realloc_ex;
 
 static void (*free_func)(void *)            = free;
+free_hook dasics_free_func = NULL;
+
 
 static void *(*malloc_locked_func)(size_t)  = malloc;
+malloc_hook dasics_malloc_locked_func = NULL;
+
 static void *default_malloc_locked_ex(size_t num, const char *file, int line)
-	{ return malloc_locked_func(num); }
+	{ return dasics_malloc_locked_func != NULL ? dasics_malloc_locked_func(DASICS_HOOK_MAGIC, DASICS_MALLOC_HOOK, num) \
+				: malloc_locked_func(num); }
 static void *(*malloc_locked_ex_func)(size_t, const char *file, int line)
         = default_malloc_locked_ex;
 
 static void (*free_locked_func)(void *)     = free;
-
+free_hook dasics_free_locked_func = NULL;
 
 
 /* may be changed as long as 'allow_customize_debug' is set */
@@ -120,6 +135,37 @@ static void (*free_debug_func)(void *,int) = NULL;
 static void (*set_debug_options_func)(long) = NULL;
 static long (*get_debug_options_func)(void) = NULL;
 #endif
+
+
+void OPENSSL_malloc_hook(malloc_hook dasics_malloc)
+{
+	if (dasics_malloc != NULL)
+	{
+		dasics_malloc_func = dasics_malloc;
+		dasics_malloc_locked_func = dasics_malloc;	
+	}
+
+}
+
+void OPENSSL_realloc_hook(realloc_hook dasics_realloc)
+{
+	if (dasics_realloc != NULL)
+	{
+		dasics_realloc_func = dasics_realloc;
+	}
+
+}
+
+void OPENSSL_free_hook(free_hook dasics_free)
+{
+	if (dasics_free != NULL)
+	{
+		dasics_free_func = dasics_free;
+		dasics_free_locked_func = dasics_free;
+	}
+}
+
+
 
 int CRYPTO_set_mem_functions(void *(*m)(size_t), void *(*r)(void *, size_t),
 	void (*f)(void *))
@@ -261,7 +307,8 @@ void *CRYPTO_malloc_locked(int num, const char *file, int line)
 		allow_customize_debug = 0;
 		malloc_debug_func(NULL, num, file, line, 0);
 		}
-	ret = malloc_locked_ex_func(num,file,line);
+	ret = dasics_malloc_locked_func != NULL ? dasics_malloc_locked_func(DASICS_HOOK_MAGIC, DASICS_MALLOC_HOOK, num) \
+			: malloc_locked_ex_func(num,file,line);
 #ifdef LEVITTE_DEBUG_MEM
 	fprintf(stderr, "LEVITTE_DEBUG_MEM:         > 0x%p (%d)\n", ret, num);
 #endif
@@ -288,7 +335,7 @@ void CRYPTO_free_locked(void *str)
 #ifdef LEVITTE_DEBUG_MEM
 	fprintf(stderr, "LEVITTE_DEBUG_MEM:         < 0x%p\n", str);
 #endif
-	free_locked_func(str);
+	dasics_free_locked_func != NULL ? dasics_free_locked_func(DASICS_HOOK_MAGIC, DASICS_FREE_HOOK, str) : free_locked_func(str);
 	if (free_debug_func != NULL)
 		free_debug_func(NULL, 1);
 	}
@@ -374,7 +421,7 @@ void *CRYPTO_realloc_clean(void *str, int old_len, int num, const char *file,
 		{
 		memcpy(ret,str,old_len);
 		OPENSSL_cleanse(str,old_len);
-		free_func(str);
+		dasics_free_func != NULL ? dasics_free_func(DASICS_HOOK_MAGIC, DASICS_FREE_HOOK, str) : free_func(str);
 		}
 #ifdef LEVITTE_DEBUG_MEM
 	fprintf(stderr,
@@ -394,7 +441,7 @@ void CRYPTO_free(void *str)
 #ifdef LEVITTE_DEBUG_MEM
 	fprintf(stderr, "LEVITTE_DEBUG_MEM:         < 0x%p\n", str);
 #endif
-	free_func(str);
+	dasics_free_func != NULL ? dasics_free_func(DASICS_HOOK_MAGIC, DASICS_FREE_HOOK, str) : free_func(str);
 	if (free_debug_func != NULL)
 		free_debug_func(NULL, 1);
 	}

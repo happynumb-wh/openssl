@@ -605,6 +605,20 @@ void ERR_load_CRYPTO_strings(void);
 #define CRYPTO_R_FIPS_MODE_NOT_SUPPORTED		 101
 #define CRYPTO_R_NO_DYNLOCK_CREATE_CALLBACK		 100
 
+#define DASICS_HOOK_MAGIC 	0xdeadbeef
+#define DASICS_MALLOC_HOOK	1
+#define DASICS_FREE_HOOK 	2
+#define DASICS_REALLOC_HOOK 3
+
+typedef void *(*malloc_hook)(unsigned long, unsigned long ,unsigned long);
+typedef void *(*realloc_hook)(unsigned long, unsigned long , void *, unsigned long);
+typedef void (*free_hook)(unsigned long, unsigned long , void *);
+
+
+void OPENSSL_malloc_hook(malloc_hook dasics_malloc);
+void OPENSSL_realloc_hook(realloc_hook dasics_realloc);
+void OPENSSL_free_hook(free_hook dasics_free);
+
 #ifdef  __cplusplus
 }
 #endif

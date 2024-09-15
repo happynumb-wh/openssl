@@ -117,6 +117,22 @@
 #include <openssl/buffer.h>
 #include <openssl/rand.h>
 
+// Get message of self heap
+void * openssl_self_heap = NULL;
+uint64_t openssl_malloc_size = 0;
+uint64_t openssl_full_size = 0;
+
+void update_self_heap_metadata(void * self_heap, uint64_t size)
+{
+	openssl_self_heap = self_heap;
+	openssl_full_size = size;
+}
+
+void update_self_heap_used(uint64_t size)
+{
+	openssl_malloc_size = size;
+}
+
 static int do_ssl3_write(SSL *s, int type, const unsigned char *buf,
 			 unsigned int len, int create_empty_fragment);
 static int ssl3_get_record(SSL *s);

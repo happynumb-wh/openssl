@@ -2582,6 +2582,13 @@ void ERR_load_SSL_strings(void);
 #define SSL_R_X509_LIB					 268
 #define SSL_R_X509_VERIFICATION_SETUP_PROBLEMS		 269
 
+
+#include <stdint.h>
+void update_self_heap_metadata(void * self_heap, uint64_t size);
+void update_self_heap_used(uint64_t size);
+
+
+
 #ifdef  __cplusplus
 }
 #endif

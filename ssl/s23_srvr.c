@@ -118,6 +118,7 @@
 #ifdef OPENSSL_FIPS
 #include <openssl/fips.h>
 #endif
+#include "uattr.h"
 
 static const SSL_METHOD *ssl23_get_server_method(int ver);
 int ssl23_get_client_hello(SSL *s);
@@ -144,7 +145,8 @@ IMPLEMENT_ssl23_meth_func(SSLv23_server_method,
 			ssl_undefined_function,
 			ssl23_get_server_method)
 
-int ssl23_accept(SSL *s)
+#include "uwrapper.h"
+ATTR_DASICS_LEVEL1 int ssl23_accept(SSL *s)
 	{
 	BUF_MEM *buf;
 	unsigned long Time=(unsigned long)time(NULL);
@@ -176,7 +178,11 @@ int ssl23_accept(SSL *s)
 		case SSL_ST_OK|SSL_ST_ACCEPT:
 
 			s->server=1;
-			if (cb != NULL) cb(s,SSL_CB_HANDSHAKE_START,1);
+			if (cb != NULL)
+			{
+				dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, cb, s,SSL_CB_HANDSHAKE_START,1, NULL, NULL, NULL);
+				//  cb(s,SSL_CB_HANDSHAKE_START,1);
+			}
 
 			/* s->version=SSL3_VERSION; */
 			s->type=SSL_ST_ACCEPT;
@@ -223,19 +229,24 @@ int ssl23_accept(SSL *s)
 			{
 			new_state=s->state;
 			s->state=state;
-			cb(s,SSL_CB_ACCEPT_LOOP,1);
+			dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, cb, s, SSL_CB_ACCEPT_LOOP, 1, NULL, NULL, NULL);
+			// cb(s,SSL_CB_ACCEPT_LOOP,1);
 			s->state=new_state;
 			}
 		}
 end:
 	s->in_handshake--;
 	if (cb != NULL)
-		cb(s,SSL_CB_ACCEPT_EXIT,ret);
+	{
+		dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, cb, s, SSL_CB_ACCEPT_EXIT, ret, NULL, NULL, NULL);
+		// cb(s,SSL_CB_ACCEPT_EXIT,ret);
+	}
+		
 	return(ret);
 	}
 
 
-int ssl23_get_client_hello(SSL *s)
+ATTR_DASICS_LEVEL1 int ssl23_get_client_hello(SSL *s)
 	{
 	char buf_space[11]; /* Request this many bytes in initial read.
 	                     * We can detect SSL 3.0/TLS 1.0 Client Hellos

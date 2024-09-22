@@ -79,3 +79,4 @@ Makefile.save
 .vscode
 .openssl
 crypto.txt
+libssl.txt

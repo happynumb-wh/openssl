@@ -123,6 +123,7 @@
 #include <openssl/objects.h>
 #include <openssl/evp.h>
 #include <openssl/x509.h>
+#include "uattr.h"
 
 /* send s->init_buf in records of type 'type' (SSL3_RT_HANDSHAKE or SSL3_RT_CHANGE_CIPHER_SPEC) */
 int ssl3_do_write(SSL *s, int type)
@@ -422,7 +423,7 @@ unsigned long ssl3_output_cert_chain(SSL *s, X509 *x)
  * The first four bytes (msg_type and length) are read in state 'st1',
  * the body is read in state 'stn'.
  */
-long ssl3_get_message(SSL *s, int st1, int stn, int mt, long max, int *ok)
+ATTR_DASICS_LEVEL2 long ssl3_get_message(SSL *s, int st1, int stn, int mt, long max, int *ok)
 	{
 	unsigned char *p;
 	unsigned long l;
@@ -685,7 +686,7 @@ int ssl_verify_alarm_type(long type)
  *    - Use a separate SSL_CTX for each option set.
  *    - Improve this code.
  */
-static void *
+ATTR_DASICS_LEVEL2 static void *
 freelist_extract(SSL_CTX *ctx, int for_read, int sz)
 	{
 	SSL3_BUF_FREELIST *list;
@@ -709,7 +710,7 @@ freelist_extract(SSL_CTX *ctx, int for_read, int sz)
 	return result;
 }
 
-static void
+ATTR_DASICS_LEVEL2 static void
 freelist_insert(SSL_CTX *ctx, int for_read, size_t sz, void *mem)
 	{
 	SSL3_BUF_FREELIST *list;

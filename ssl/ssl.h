@@ -170,6 +170,8 @@
 extern "C" {
 #endif
 
+// #define OPENSSL_NO_BUF_FREELISTS
+
 /* SSLeay version number for ASN.1 encoding of the session information */
 /* Version 0 - initial version
  * Version 1 - added the optional peer certificate
@@ -2586,8 +2588,8 @@ void ERR_load_SSL_strings(void);
 #include <stdint.h>
 void update_self_heap_metadata(void * self_heap, uint64_t size);
 void update_self_heap_used(uint64_t size);
-
-
+void init_elf_info(void * ptr);
+void init_dasics_maincall(void * ptr);
 
 #ifdef  __cplusplus
 }

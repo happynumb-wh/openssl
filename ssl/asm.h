@@ -30,6 +30,7 @@
 
 #define ULIBENTRY(name)                             \
         .globl name;                            \
+        .section .dasics_text.ssldasics_level1; \
         .balign 4;                              \
         name:
 

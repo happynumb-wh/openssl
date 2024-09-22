@@ -460,6 +460,7 @@ int ssl_get_new_session(SSL *s, int session)
  *   - Both for new and resumed sessions, s->tlsext_ticket_expected is set to 1
  *     if the server should issue a new session ticket (to 0 otherwise).
  */
+#include "uwrapper.h"
 int ssl_get_prev_session(SSL *s, unsigned char *session_id, int len,
 			const unsigned char *limit)
 	{
@@ -525,7 +526,9 @@ int ssl_get_prev_session(SSL *s, unsigned char *session_id, int len,
 		{
 		int copy=1;
 	
-		if ((ret=s->session_ctx->get_session_cb(s,session_id,len,&copy)))
+		// if ((ret=s->session_ctx->get_session_cb(s,session_id,len,&copy)))
+		ret = (SSL_SESSION *)dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, s->session_ctx->get_session_cb, s,session_id,len,&copy, NULL, NULL);
+		if (ret)
 			{
 			s->session_ctx->stats.sess_cb_hit++;
 

@@ -159,6 +159,8 @@
 #ifndef OPENSSL_NO_ENGINE
 #include <openssl/engine.h>
 #endif
+#include "uwrapper.h"
+#include "uattr.h"
 
 const char *SSL_version_str=OPENSSL_VERSION_TEXT;
 
@@ -931,7 +933,7 @@ int SSL_check_private_key(const SSL *ssl)
 		ssl->cert->key->privatekey));
 	}
 
-int SSL_accept(SSL *s)
+ATTR_DASICS_LEVEL1 int SSL_accept(SSL *s)
 	{
 	if (s->handshake_func == 0)
 		/* Not properly initialized yet */
@@ -2411,7 +2413,9 @@ void ssl_update_cache(SSL *s,int mode)
 		&& (s->session_ctx->new_session_cb != NULL))
 		{
 		CRYPTO_add(&s->session->references,1,CRYPTO_LOCK_SSL_SESSION);
-		if (!s->session_ctx->new_session_cb(s,s->session))
+
+		// if (!s->session_ctx->new_session_cb(s,s->session))
+		if(!((int)dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, s->session_ctx->new_session_cb, s,s->session, NULL, NULL, NULL, NULL)))
 			SSL_SESSION_free(s->session);
 		}
 
@@ -2547,7 +2551,7 @@ int SSL_get_error(const SSL *s,int i)
 	return(SSL_ERROR_SYSCALL);
 	}
 
-int SSL_do_handshake(SSL *s)
+ATTR_DASICS_LEVEL1 int SSL_do_handshake(SSL *s)
 	{
 	int ret=1;
 

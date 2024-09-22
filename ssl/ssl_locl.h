@@ -903,7 +903,7 @@ const SSL_CIPHER *ssl3_get_cipher(unsigned int u);
 int ssl3_renegotiate(SSL *ssl); 
 int ssl3_renegotiate_check(SSL *ssl); 
 int ssl3_dispatch_alert(SSL *s);
-int __attribute__((section(".ssldasics"))) ssl3_read_bytes(SSL *s, int type, unsigned char *buf, int len, int peek);
+int ssl3_read_bytes(SSL *s, int type, unsigned char *buf, int len, int peek);
 int ssl3_write_bytes(SSL *s, int type, const void *buf, int len);
 int ssl3_final_finish_mac(SSL *s, const char *sender, int slen,unsigned char *p);
 int ssl3_cert_verify_mac(SSL *s, int md_nid, unsigned char *p);

@@ -17,7 +17,8 @@ END(dasics_umain_libcall)
 ULIBENTRY(dasics_ulib_libcall)
     addi   sp, sp, -8
     sd     ra, 0(sp)
-    .word 0x0007108b    // dasicscall.jr ra, a4
+    fence.i
+    .word 0x0008908b    // dasicscall.jr ra, a7
     ld     ra, 0(sp)
     addi   sp, sp, 8
     ret
@@ -46,3 +47,10 @@ ULIBENTRY(dasics_ulib_query_jmp_bound)
     .word 0x0010350b //dibndquery a0, 1
     ret
 END(dasics_ulib_query_jmp_bound)
+
+
+ULIBENTRY(dasics_umain_call)
+    ld t0, umaincall_helper
+    jr t0
+    ret
+END(dasics_umain_call)

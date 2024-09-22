@@ -1,9 +1,13 @@
 #include "uwrapper.h"
 #include "udasics.h"
 #include "csr.h"
+#include "uattr.h"
 
-int32_t dasics_ulib_libcfg_alloc(uint64_t cfg, uint64_t lo, uint64_t hi) {
-    
+uint64_t umaincall_helper;
+
+ATTR_DASICS_LEVEL1 int32_t dasics_ulib_libcfg_alloc(uint64_t cfg, uint64_t lo, uint64_t hi) {
+    lo = ROUNDDOWN(lo, 0x8);
+    hi = ROUND(hi, 0x8);
     uint64_t libcfg = read_csr(0x880);  // DasicsLibCfg
     int32_t max_cfgs = DASICS_LIBCFG_WIDTH;
     uint64_t mem_bound_status = dasics_ulib_query_bound(TYPE_MEM_BOUND);
@@ -90,7 +94,11 @@ int32_t dasics_ulib_libcfg_alloc(uint64_t cfg, uint64_t lo, uint64_t hi) {
                     if (orig_lo <= lo && hi <= orig_hi && !(cfg & ~orig_cfg)) break; // current field smaller than origin, OK
                 }
             }
-            if (orig_idx == max_cfgs) return -1; // no origin libcfg
+            if (orig_idx == max_cfgs)
+            {
+                printf("no origin libcfg\n");
+                return -1; // no origin libcfg
+            }
             dasics_ulib_copy_bound(TYPE_MEM_BOUND,orig_idx,target_idx); // copy origin libcfg to target
             switch (target_idx) { // modify target libcfg according to arg
                 case 0:
@@ -168,11 +176,12 @@ int32_t dasics_ulib_libcfg_alloc(uint64_t cfg, uint64_t lo, uint64_t hi) {
             return target_idx;
         }
     }
+    printf("failed in alloc\n");
     return -1;
 }
 
 
-int32_t dasics_ulib_libcfg_copy(int src_idx) {
+ATTR_DASICS_LEVEL1 int32_t dasics_ulib_libcfg_copy(int src_idx) {
     uint64_t libcfg = read_csr(0x880);  // DasicsLibCfg
     int32_t max_cfgs = DASICS_LIBCFG_WIDTH;
     uint64_t mem_bound_status = dasics_ulib_query_bound(TYPE_MEM_BOUND);
@@ -190,13 +199,22 @@ int32_t dasics_ulib_libcfg_copy(int src_idx) {
     return -1;
 }
 
-int32_t dasics_ulib_libcfg_free(int32_t idx) {
+#include <stdio.h>
+ATTR_DASICS_LEVEL1 int32_t dasics_ulib_libcfg_free(int32_t idx) {
     uint64_t mem_bound_status = dasics_ulib_query_bound(TYPE_MEM_BOUND);
-    if (!(mem_bound_status >> (idx * 2) & 0x3)) return -1; // no permission
+    if (!(mem_bound_status >> (idx * 2) & 0x3))
+    {
+        printf("free no permission\n");
+         return -1; // no permission
+    }
 
-    if (idx < 0 || idx >= DASICS_LIBCFG_WIDTH) return -1;
+    if (idx < 0 || idx >= DASICS_LIBCFG_WIDTH)
+    {
+        printf("not bound\n");
+         return -1;
+    }
     uint64_t libcfg = read_csr(0x880);  // DasicsLibCfg
-    libcfg &= ~(DASICS_LIBCFG_V << (idx * 4));
+    libcfg &= ~(DASICS_LIBCFG_MASK << (idx * 4));
     write_csr(0x880, libcfg);   // DasicsLibCfg
     return 0;
 }
@@ -207,8 +225,10 @@ int32_t dasics_ulib_libcfg_free(int32_t idx) {
 //     return (libcfg >> (idx * 4)) & DASICS_LIBCFG_MASK;
 // }
 
-int32_t dasics_ulib_jumpcfg_alloc(uint64_t lo, uint64_t hi)
+ATTR_DASICS_LEVEL1 int32_t dasics_ulib_jumpcfg_alloc(uint64_t lo, uint64_t hi)
 {
+    lo = ROUNDDOWN(lo, 0x8);
+    hi = ROUND(hi, 0x8);    
     uint64_t jumpcfg = read_csr(0x8c8);    // DasicsJumpCfg
     int32_t max_cfgs = DASICS_JUMPCFG_WIDTH;
     uint64_t jmp_bound_status = dasics_ulib_query_bound(TYPE_JMP_BOUND);
@@ -260,7 +280,7 @@ int32_t dasics_ulib_jumpcfg_alloc(uint64_t lo, uint64_t hi)
     return -1;
 }
 
-int32_t dasics_ulib_jumpcfg_free(int32_t idx) {
+ATTR_DASICS_LEVEL1 int32_t dasics_ulib_jumpcfg_free(int32_t idx) {
     uint64_t jmp_bound_status = dasics_ulib_query_bound(TYPE_JMP_BOUND);
     if (!(jmp_bound_status >> (idx * 2) & 0x3)) return -1; // no permission
     

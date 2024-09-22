@@ -49,13 +49,30 @@ SECTIONS
     KEEP (*(SORT_NONE(.init)))
   }
   . = ALIGN(64 / 8);
-  .ssldasics :
+   .dasics_text.ssldasics_level1    :
   {
-    PROVIDE (__dasics_ssl_begin = .);
-    *(.ssldasics)
-    PROVIDE (__dasics_ssl_end = .); 
+    . = ALIGN(64 / 8);
+    PROVIDE (__dasics_level1_ssl_begin = .);
+    *(.dasics_text.ssldasics_level1)
+    PROVIDE (__dasics_level1_ssl_end = .); 
+    . = ALIGN(64 / 8);
+  }
+   .dasics_text.ssldasics_level2    :
+  {
+    . = ALIGN(64 / 8);
+    PROVIDE (__dasics_level2_ssl_begin = .);
+    *(.dasics_text.ssldasics_level2)
+    PROVIDE (__dasics_level2_ssl_end = .); 
+    . = ALIGN(64 / 8);    
   }  
-  . = ALIGN(64 / 8);
+   .dasics_text.ssldasics_level3    :
+  {
+    . = ALIGN(64 / 8);
+    PROVIDE (__dasics_level3_ssl_begin = .);
+    *(.dasics_text.ssldasics_level3)
+    PROVIDE (__dasics_level3_ssl_end = .); 
+    . = ALIGN(64 / 8);    
+  }
   .plt            : { *(.plt) *(.iplt) }
   .text           :
   {
@@ -146,9 +163,21 @@ SECTIONS
   .jcr            : { KEEP (*(.jcr)) }
   .data.rel.ro : { *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*) *(.data.rel.ro .data.rel.ro.* .gnu.linkonce.d.rel.ro.*) }
   .dynamic        : { *(.dynamic) }
-  .got            : { *(.got) *(.igot) }
+  . = ALIGN(64 / 8);
+  PROVIDE(__openssl_got_begin = .);
+  .got            : 
+  {
+    *(.got) 
+    *(.igot) 
+  }
   . = DATA_SEGMENT_RELRO_END (SIZEOF (.got.plt) >= 16 ? 16 : 0, .);
-  .got.plt        : { *(.got.plt) *(.igot.plt) }
+  .got.plt        : 
+  {
+     *(.got.plt) 
+     *(.igot.plt) 
+  }
+  PROVIDE(__openssl_got_end = .);
+  . = ALIGN(64 / 8);
   .data           :
   {
     *(.data .data.* .gnu.linkonce.d.*)

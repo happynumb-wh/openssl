@@ -312,6 +312,8 @@ void *CRYPTO_malloc_locked(int num, const char *file, int line)
 #ifdef LEVITTE_DEBUG_MEM
 	fprintf(stderr, "LEVITTE_DEBUG_MEM:         > 0x%p (%d)\n", ret, num);
 #endif
+// printf("OPENSSL_MALLOC_LOCK_MEM:         > 0x%p (%d)\n", ret, num);
+	
 	if (malloc_debug_func != NULL)
 		malloc_debug_func(ret, num, file, line, 1);
 
@@ -335,6 +337,8 @@ void CRYPTO_free_locked(void *str)
 #ifdef LEVITTE_DEBUG_MEM
 	fprintf(stderr, "LEVITTE_DEBUG_MEM:         < 0x%p\n", str);
 #endif
+	// printf("OPENSSL_FREE_MEM:         < 0x%p\n", str);
+
 	dasics_free_locked_func != NULL ? dasics_free_locked_func(DASICS_HOOK_MAGIC, DASICS_FREE_HOOK, str) : free_locked_func(str);
 	if (free_debug_func != NULL)
 		free_debug_func(NULL, 1);
@@ -356,6 +360,7 @@ void *CRYPTO_malloc(int num, const char *file, int line)
 #ifdef LEVITTE_DEBUG_MEM
 	fprintf(stderr, "LEVITTE_DEBUG_MEM:         > 0x%p (%d)\n", ret, num);
 #endif
+// printf("OPENSSL_MALLOC_MEM:         > 0x%p (%d)\n", ret, num);
 	if (malloc_debug_func != NULL)
 		malloc_debug_func(ret, num, file, line, 1);
 
@@ -394,6 +399,7 @@ void *CRYPTO_realloc(void *str, int num, const char *file, int line)
 #ifdef LEVITTE_DEBUG_MEM
 	fprintf(stderr, "LEVITTE_DEBUG_MEM:         | 0x%p -> 0x%p (%d)\n", str, ret, num);
 #endif
+// printf("OPENSSL_REALLOC_MEM:         | 0x%p -> 0x%p (%d)\n", str, ret, num);
 	if (realloc_debug_func != NULL)
 		realloc_debug_func(str, ret, num, file, line, 1);
 
@@ -428,6 +434,8 @@ void *CRYPTO_realloc_clean(void *str, int old_len, int num, const char *file,
 		"LEVITTE_DEBUG_MEM:         | 0x%p -> 0x%p (%d)\n",
 		str, ret, num);
 #endif
+	// printf("OPENSSL_REALLOC_MEM:         | 0x%p -> 0x%p (%d)\n", str, ret, num);
+
 	if (realloc_debug_func != NULL)
 		realloc_debug_func(str, ret, num, file, line, 1);
 
@@ -441,6 +449,7 @@ void CRYPTO_free(void *str)
 #ifdef LEVITTE_DEBUG_MEM
 	fprintf(stderr, "LEVITTE_DEBUG_MEM:         < 0x%p\n", str);
 #endif
+	// printf("OPENSSL_FREE_MEM:         < 0x%p\n", str);
 	dasics_free_func != NULL ? dasics_free_func(DASICS_HOOK_MAGIC, DASICS_FREE_HOOK, str) : free_func(str);
 	if (free_debug_func != NULL)
 		free_debug_func(NULL, 1);

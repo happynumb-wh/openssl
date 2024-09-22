@@ -116,28 +116,49 @@
 #include <openssl/evp.h>
 #include <openssl/buffer.h>
 #include <openssl/rand.h>
+#include "uattr.h"
+#include "uwrapper.h"
 
 // Get message of self heap
 void * openssl_self_heap = NULL;
 uint64_t openssl_malloc_size = 0;
 uint64_t openssl_full_size = 0;
 
-void update_self_heap_metadata(void * self_heap, uint64_t size)
+struct elf_msg openssl_elf;
+
+ATTR_DASICS_LEVEL1 void init_dasics_maincall(void * ptr)
+{
+	umaincall_helper = (uint64_t)ptr;
+	printf("[OPENSSL LOG]: openssl dasics umaincall helper 0x%lx\n", umaincall_helper);
+}
+
+ATTR_DASICS_LEVEL1 void update_self_heap_metadata(void * self_heap, uint64_t size)
 {
 	openssl_self_heap = self_heap;
 	openssl_full_size = size;
+	printf("[OPENSSL LOG]: openssl_self_heap: 0x%lx, size: 0x%lx\n", openssl_self_heap, openssl_full_size);
 }
 
-void update_self_heap_used(uint64_t size)
+ATTR_DASICS_LEVEL1 void update_self_heap_used(uint64_t size)
 {
 	openssl_malloc_size = size;
 }
 
-static int do_ssl3_write(SSL *s, int type, const unsigned char *buf,
-			 unsigned int len, int create_empty_fragment);
-static int ssl3_get_record(SSL *s);
+ATTR_DASICS_LEVEL1 void init_elf_info(void * ptr)
+{
 
-int ssl3_read_n(SSL *s, int n, int max, int extend)
+	memcpy(&openssl_elf, ptr, sizeof(struct elf_msg));
+	printf("[OPENSSL LOG]: openssl elf read begin: 0x%lx, end: 0x%lx\n", openssl_elf._r_start, openssl_elf._r_end);
+	printf("[OPENSSL LOG]: openssl elf write begin: 0x%lx, end: 0x%lx\n", openssl_elf._w_start, openssl_elf._w_end);
+	printf("[OPENSSL LOG]: openssl text begin: 0x%lx, end: 0x%lx\n", openssl_elf._text_start, openssl_elf._text_end);
+	printf("[OPENSSL LOG]: openssl plt begin: 0x%lx, end: 0x%lx\n", openssl_elf._plt_start, openssl_elf._plt_end);
+}
+
+ATTR_DASICS_LEVEL2 static int do_ssl3_write(SSL *s, int type, const unsigned char *buf,
+			 unsigned int len, int create_empty_fragment);
+ATTR_DASICS_LEVEL2 static int ssl3_get_record(SSL *s);
+
+ATTR_DASICS_LEVEL2 int ssl3_read_n(SSL *s, int n, int max, int extend)
 	{
 	/* If extend == 0, obtain new n-byte packet; if extend == 1, increase
 	 * packet by another n bytes.
@@ -297,7 +318,7 @@ int ssl3_read_n(SSL *s, int n, int max, int extend)
  * ssl->s3->rrec.length, - number of bytes
  */
 /* used only by ssl3_read_bytes */
-static int ssl3_get_record(SSL *s)
+ATTR_DASICS_LEVEL2 static int ssl3_get_record(SSL *s)
 	{
 	int ssl_major,ssl_minor,al;
 	int enc_err,n,i,ret= -1;
@@ -552,7 +573,7 @@ err:
 	return(ret);
 	}
 
-int ssl3_do_uncompress(SSL *ssl)
+ATTR_DASICS_LEVEL2 int ssl3_do_uncompress(SSL *ssl)
 	{
 #ifndef OPENSSL_NO_COMP
 	int i;
@@ -570,7 +591,7 @@ int ssl3_do_uncompress(SSL *ssl)
 	return(1);
 	}
 
-int ssl3_do_compress(SSL *ssl)
+ATTR_DASICS_LEVEL2 int ssl3_do_compress(SSL *ssl)
 	{
 #ifndef OPENSSL_NO_COMP
 	int i;
@@ -593,7 +614,7 @@ int ssl3_do_compress(SSL *ssl)
 /* Call this to write data in records of type 'type'
  * It will return <= 0 if not all data has been sent or non-blocking IO.
  */
-int ssl3_write_bytes(SSL *s, int type, const void *buf_, int len)
+ATTR_DASICS_LEVEL2 int ssl3_write_bytes(SSL *s, int type, const void *buf_, int len)
 	{
 	const unsigned char *buf=buf_;
 	unsigned int tot,n,nw;
@@ -645,7 +666,7 @@ int ssl3_write_bytes(SSL *s, int type, const void *buf_, int len)
 		}
 	}
 
-static int do_ssl3_write(SSL *s, int type, const unsigned char *buf,
+ATTR_DASICS_LEVEL2 static int do_ssl3_write(SSL *s, int type, const unsigned char *buf,
 			 unsigned int len, int create_empty_fragment)
 	{
 	unsigned char *p,*plen;
@@ -872,7 +893,7 @@ err:
 	}
 
 /* if s->s3->wbuf.left != 0, we need to call this */
-int ssl3_write_pending(SSL *s, int type, const unsigned char *buf,
+ATTR_DASICS_LEVEL2 int ssl3_write_pending(SSL *s, int type, const unsigned char *buf,
 	unsigned int len)
 	{
 	int i;
@@ -954,7 +975,7 @@ int ssl3_write_pending(SSL *s, int type, const unsigned char *buf,
  *     Application data protocol
  *             none of our business
  */
-int __attribute__((section(".ssldasics")))  ssl3_read_bytes(SSL *s, int type, unsigned char *buf, int len, int peek)
+ATTR_DASICS_LEVEL2 int ssl3_read_bytes(SSL *s, int type, unsigned char *buf, int len, int peek)
 	{
 	int al,i,j,ret;
 	unsigned int n;
@@ -1105,41 +1126,7 @@ start:
 #ifndef OPENSSL_NO_HEARTBEATS
 		else if (rr->type == TLS1_RT_HEARTBEAT)
 			{
-			// Put a moat here
-#include "udasics.h"
-#include "uwrapper.h"
-		#define TASK_SIZE 0X4000000000
-		/* Rounding; only works for n = power of two */
-		#define ROUND(a, n)     (((((uint64_t)(a))+(n)-1)) & ~((n)-1))
-
-		#define ROUNDDOWN(a, n) (((uint64_t)(a)) & ~((n)-1))
-
-			extern uint64_t __dasics_ssl_begin[];
-			extern uint64_t __dasics_ssl_end[];
-			// a moat <= 256 byte
-			uint64_t moat_low = ROUND((uint64_t)(&s->s3->rrec.data[0]) + s->s3->rrec.length, 8);
-			uint64_t moat_hi = ROUNDDOWN((uint64_t)(&s->s3->rrec.data[0]) + s->s3->rrec.length + 256, 8);
-
-			printf("[DASICS log]: Recv heart pkt from 0x%lx to 0x%lx\n", (uint64_t)(&s->s3->rrec.data[0]), moat_low);
-			printf("[DASICS log]: Call tls1_process_heartbeat\n");
-
-			//SET tls1_process_heartbeat moat
-			int idx0, idx1, idx2, idx3;
-
-			// idx0 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)0, (uint64_t)(moat_low));
-			// idx1 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)moat_hi, (uint64_t)(TASK_SIZE));
-			// int32_t idx_heartbeat = dasics_ulib_jumpcfg_alloc(ROUNDDOWN((uint64_t)(&__dasics_ssl_end), 0x8), TASK_SIZE);
-
-
-			// dasics_ulib_libcall(s, 0, 0, 0, &tls1_process_heartbeat);
 			tls1_process_heartbeat(s);
-
-			printf("[DASICS log]:Return tls1_process_heartbeat \n");
-
-			//FREE
-			// dasics_ulib_libcfg_free(idx1);
-			// dasics_ulib_libcfg_free(idx0);
-			// dasics_ulib_jumpcfg_free(idx_heartbeat);
 
 			/* Exit and notify application to read again */
 			rr->length = 0;
@@ -1266,7 +1253,8 @@ start:
 		if (cb != NULL)
 			{
 			j = (alert_level << 8) | alert_descr;
-			cb(s, SSL_CB_READ_ALERT, j);
+			// cb(s, SSL_CB_READ_ALERT, j);
+			dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, cb, s, SSL_CB_READ_ALERT, j, NULL, NULL, NULL);
 			}
 
 		if (alert_level == 1) /* warning */
@@ -1468,7 +1456,7 @@ err:
 	return(-1);
 	}
 
-int ssl3_do_change_cipher_spec(SSL *s)
+ATTR_DASICS_LEVEL2 int ssl3_do_change_cipher_spec(SSL *s)
 	{
 	int i;
 	const char *sender;
@@ -1521,7 +1509,7 @@ int ssl3_do_change_cipher_spec(SSL *s)
 	return(1);
 	}
 
-int ssl3_send_alert(SSL *s, int level, int desc)
+ATTR_DASICS_LEVEL2 int ssl3_send_alert(SSL *s, int level, int desc)
 	{
 	/* Map tls/ssl alert value to correct one */
 	desc=s->method->ssl3_enc->alert_value(desc);
@@ -1542,7 +1530,7 @@ int ssl3_send_alert(SSL *s, int level, int desc)
 	return -1;
 	}
 
-int ssl3_dispatch_alert(SSL *s)
+ATTR_DASICS_LEVEL2 int ssl3_dispatch_alert(SSL *s)
 	{
 	int i,j;
 	void (*cb)(const SSL *ssl,int type,int val)=NULL;
@@ -1572,7 +1560,8 @@ int ssl3_dispatch_alert(SSL *s)
 		if (cb != NULL)
 			{
 			j=(s->s3->send_alert[0]<<8)|s->s3->send_alert[1];
-			cb(s,SSL_CB_WRITE_ALERT,j);
+			// cb(s,SSL_CB_WRITE_ALERT,j);
+			dasics_umain_call(DASICS_HOOK_FUNC_MAGIC, cb, s,SSL_CB_WRITE_ALERT,j, NULL, NULL, NULL);
 			}
 		}
 	return(i);

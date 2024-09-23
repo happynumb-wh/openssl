@@ -910,39 +910,16 @@ ATTR_DASICS_LEVEL1 int ssl3_check_client_hello(SSL *s)
 			&ok);	
 		goto no_dasics;	
 	}
-		// n=s->method->ssl_get_message(s,
-		// 	SSL3_ST_SR_CERT_A,
-		// 	SSL3_ST_SR_CERT_B,
-		// 	-1,
-		// 	s->max_cert_list,
-		// 	&ok);	
 	int32_t idx0 = 666, idx1 = 666, idx2 = 666, idx3 = 666, idx4 = 666, idx5 = 666, idx6 = 666, idx7 = 666, idx8 = 666, idx9 = 666, idx10 = 666, idx11 = 666;
-	// printf("[DASICS LEVEL1]: LEVEL jump level: 0x%lx to 0x%lx\n", (uint64_t)(__dasics_level1_ssl_end), openssl_elf._text_end);
 	register uint64_t sp asm("sp");
 	register uint64_t tp asm("tp");
-
-	// printf("[DASICS LEVEL1]: self stack: 0x%lx to 0x%lx\n", (uint64_t)sp - 4 * PAGE_SIZE, (uint64_t)(&ok) + 8);
 	idx0 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)sp - 4 * PAGE_SIZE, (uint64_t)(&ok) + 8);
-	
-	// printf("[DASICS LEVEL1]: self heap: 0x%lx to 0x%lx\n", (uint64_t)openssl_self_heap + openssl_malloc_size, (uint64_t)openssl_self_heap + openssl_full_size);
 	idx1 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)openssl_self_heap + openssl_malloc_size, (uint64_t)openssl_self_heap + openssl_full_size);
-	
-	// printf("[DASICS LEVEL1]: SSL local read/write data: 0x%lx to 0x%lx\n", (uint64_t)openssl_elf._r_start, (uint64_t)openssl_elf._w_end);
 	idx2 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)openssl_elf._r_start, (uint64_t)openssl_elf._w_end);
-
-	// printf("[DASICS LEVEL1]: SSL handshake_dgst data: 0x%lx to 0x%lx\n", (uint64_t)s->s3->handshake_dgst, (uint64_t)s->s3->handshake_dgst + sizeof(*s->s3->handshake_dgst) * SSL_MAX_DIGEST);
 	if (s->s3->handshake_dgst)
 		idx3 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)s->s3->handshake_dgst, (uint64_t)s->s3->handshake_dgst + sizeof(*s->s3->handshake_dgst) * SSL_MAX_DIGEST);
-
 	// Do TLS
-	// printf("[DASICS LEVEL1]: TLS: 0x%lx to 0x%lx\n", (uint64_t)(tp), (uint64_t)tp + PAGE_SIZE/2);
 	idx5 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)tp, (uint64_t)tp + PAGE_SIZE / 2);
-	
-	// printf("[DASICS LEVEL1]: ssl area begin: 0x%lx, end: 0x%lx\n", (uint64_t)openssl_self_heap, (uint64_t)s->s3->rbuf.buf + s->s3->rbuf.len);
-	// printf("[DASICS LEVEL1]: s->s3->rbuf.buf: 0x%lx, end: 0x%lx\n", (uint64_t)s->s3->rbuf.buf, (uint64_t)s->s3->rbuf.buf + s->s3->rbuf.len);
-	// printf("[DASICS LEVEL1]: s->init_buf: 0x%lx, end: 0x%lx\n", (uint64_t)s->init_buf, (uint64_t)s->init_buf->data + s->init_buf->max);
-
-	
 	idx6 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s, (uint64_t)(uint64_t)s + sizeof(*s));
 	idx7 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s->ctx, (uint64_t)s->ctx->wbuf_freelist + sizeof(*s->ctx->wbuf_freelist));
 	idx8 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s->s3, (uint64_t)s->s3 + sizeof(*s->s3));
@@ -1069,40 +1046,19 @@ ATTR_DASICS_LEVEL1 int ssl3_get_client_hello(SSL *s)
 			&ok);		
 		goto no_dasics;
 	}
-		// n=s->method->ssl_get_message(s,
-		// 	SSL3_ST_SR_CLNT_HELLO_B,
-		// 	SSL3_ST_SR_CLNT_HELLO_C,
-		// 	SSL3_MT_CLIENT_HELLO,
-		// 	SSL3_RT_MAX_PLAIN_LENGTH,
-		// 	&ok);
+
 	int32_t idx0 = 666, idx1 = 666, idx2 = 666, idx3 = 666, idx4 = 666, idx5 = 666, idx6 = 666, idx7 = 666, idx8 = 666, idx9 = 666, idx10 = 666, idx11=666, idx12=666;
-	// printf("[DASICS LEVEL1]: LEVEL jump level: 0x%lx to 0x%lx\n", (uint64_t)(__dasics_level1_ssl_end), openssl_elf._text_end);
 	register uint64_t sp asm("sp");
 	register uint64_t tp asm("tp");
 
-	// printf("[DASICS LEVEL1]: self stack: 0x%lx to 0x%lx\n", (uint64_t)sp - 4 * PAGE_SIZE, (uint64_t)(&ok) + 8);
 	idx0 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)sp - 4 * PAGE_SIZE, (uint64_t)(&ok) + 8);
-
-	// printf("[DASICS LEVEL1]: self heap: 0x%lx to 0x%lx\n", (uint64_t)openssl_self_heap + openssl_malloc_size, (uint64_t)openssl_self_heap + openssl_full_size);
-	
 	idx1 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)openssl_self_heap + openssl_malloc_size, (uint64_t)openssl_self_heap + openssl_full_size);
-	
-	// printf("[DASICS LEVEL1]: SSL local read/write data: 0x%lx to 0x%lx\n", (uint64_t)openssl_elf._r_start, (uint64_t)openssl_elf._w_end);
 	idx2 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)openssl_elf._r_start, (uint64_t)openssl_elf._w_end);
-
-	// printf("[DASICS LEVEL1]: SSL handshake_dgst data: 0x%lx to 0x%lx\n", (uint64_t)s->s3->handshake_dgst, (uint64_t)s->s3->handshake_dgst + sizeof(*s->s3->handshake_dgst) * SSL_MAX_DIGEST);
 	if (s->s3->handshake_dgst)
 		idx3 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_R | DASICS_LIBCFG_W, (uint64_t)s->s3->handshake_dgst, (uint64_t)s->s3->handshake_dgst + sizeof(*s->s3->handshake_dgst) * SSL_MAX_DIGEST);
 
 	// Do TLS
-	// printf("[DASICS LEVEL1]: TLS: 0x%lx to 0x%lx\n", (uint64_t)(tp), (uint64_t)tp + PAGE_SIZE/2);	
 	idx5 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)tp, (uint64_t)tp + PAGE_SIZE / 2);
-	
-	// printf("[DASICS LEVEL1]: ssl area begin: 0x%lx, end: 0x%lx\n", (uint64_t)openssl_self_heap, (uint64_t)s->s3->rbuf.buf + s->s3->rbuf.len);
-	// printf("[DASICS LEVEL1]: s->s3->rbuf.buf: 0x%lx, end: 0x%lx\n", (uint64_t)s->s3->rbuf.buf, (uint64_t)s->s3->rbuf.buf + s->s3->rbuf.len);
-	// printf("[DASICS LEVEL1]: s->init_buf: 0x%lx, end: 0x%lx\n", (uint64_t)s->init_buf, (uint64_t)s->init_buf->data + s->init_buf->max);
-
-	
 	idx6 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s, (uint64_t)(uint64_t)s + sizeof(*s));
 	idx7 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s->ctx, (uint64_t)s->ctx->wbuf_freelist + sizeof(*s->ctx->wbuf_freelist));
 	idx8 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)s->s3, (uint64_t)s->s3 + sizeof(*s->s3));
@@ -1117,9 +1073,6 @@ ATTR_DASICS_LEVEL1 int ssl3_get_client_hello(SSL *s)
 	{
 		idx11 = dasics_ulib_libcfg_alloc(DASICS_LIBCFG_V | DASICS_LIBCFG_W | DASICS_LIBCFG_R, (uint64_t)ent, (uint64_t)ent + (uint64_t)list->chunklen);
 	}
-	
-
-
 
 	assert((int)idx0 != -1);
 	assert((int)idx1 != -1);

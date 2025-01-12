@@ -132,11 +132,12 @@ ATTR_DASICS_LEVEL1 void init_dasics_maincall(void * ptr)
 	printf("[OPENSSL LOG]: openssl dasics umaincall helper 0x%lx\n", umaincall_helper);
 }
 
-ATTR_DASICS_LEVEL1 void update_self_heap_metadata(void * self_heap, uint64_t size)
+ATTR_DASICS_LEVEL1 void * update_self_heap_metadata(void * self_heap, uint64_t size)
 {
 	openssl_self_heap = self_heap;
 	openssl_full_size = size;
 	printf("[OPENSSL LOG]: openssl_self_heap: 0x%lx, size: 0x%lx\n", openssl_self_heap, openssl_full_size);
+	return &openssl_malloc_size;
 }
 
 ATTR_DASICS_LEVEL1 void update_self_heap_used(uint64_t size)

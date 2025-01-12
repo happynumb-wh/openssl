@@ -2586,7 +2586,7 @@ void ERR_load_SSL_strings(void);
 
 
 #include <stdint.h>
-void update_self_heap_metadata(void * self_heap, uint64_t size);
+void *update_self_heap_metadata(void * self_heap, uint64_t size);
 void update_self_heap_used(uint64_t size);
 void init_elf_info(void * ptr);
 void init_dasics_maincall(void * ptr);
